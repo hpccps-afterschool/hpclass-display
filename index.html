@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>放學班別顯示板</title>
+  <style>
+    :root {
+      --bg-color: #f6f5ef;
+      --card-bg: #fcfbf9;
+      --header-bg: #1e252b;
+      --header-text: #ffffff;
+      --red-btn: #d94141;
+      --red-btn-hover: #b83232;
+      --green-btn: #2e8b57;
+      --green-btn-hover: #246e45;
+      --text-main: #2c3e50;
+      --border-color: #e2e0d8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: 
+        linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+      color: var(--text-main);
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Top Banner Header */
+    .header-banner {
+      background-color: var(--header-bg);
+      color: var(--header-text);
+      border-radius: 12px;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .header-left .sub-tag {
+      font-size: 13px;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: #ffd166;
+    }
+
+    .header-left h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .header-left p {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .counter-box {
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 10px 24px;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .counter-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #ffd166;
+    }
+
+    .counter-label {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    /* Info Strip */
+    .info-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background-color: #fff8e7;
+      border: 1px solid #ffe5b4;
+      padding: 10px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #8a5300;
+    }
+
+    .info-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-reset {
+      background-color: #4a5568;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+
+    .btn-reset:hover {
+      background-color: #2d3748;
+    }
+
+    /* Grades Grid */
+    .grades-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .grades-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .grades-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .grade-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .grade-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #1a202c;
+    }
+
+    .classes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    /* Class Button Component */
+    .class-btn {
+      position: relative;
+      height: 80px;
+      border-radius: 14px;
+      border: none;
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+    }
+
+    .class-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Unreleased State (Red) */
+    .class-btn.unreleased {
+      background: var(--red-btn);
+    }
+    .class-btn.unreleased:hover {
+      background: var(--red-btn-hover);
+    }
+
+    /* Released State (Green) */
+    .class-btn.released {
+      background: var(--green-btn);
+    }
+    .class-btn.released:hover {
+      background: var(--green-btn-hover);
+    }
+
+    /* Corner Arc Decoration */
+    .class-btn::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      bottom: -10px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .class-name {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .class-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.95;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #ffe600;
+    }
+
+    .class-btn.released .status-dot {
+      background-color: #72ff72;
+    }
+
+    .footer-text {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 13px;
+      color: #718096;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Banner -->
+  <header class="header-banner">
+    <div class="header-left">
+      <div class="sub-tag">
+        <span>🏫</span> 放學狀態看板
+      </div>
+      <h1>放學班別顯示板</h1>
+      <p>按一下班別，即時更新放學狀態。</p>
+    </div>
+    <div class="counter-box">
+      <div class="counter-number" id="counter">0 / 25</div>
+      <div class="counter-label">已放學班別</div>
+    </div>
+  </header>
+
+  <!-- Info Strip -->
+  <div class="info-strip">
+    <div class="info-left">
+      <span>✋</span>
+      <span>紅色代表未放學，綠色代表已放學；班別放學後，請按一下班別按鈕。</span>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">🔄 手動重設全部</button>
+  </div>
+
+  <!-- Main Grades Container -->
+  <main class="grades-grid" id="gradesContainer"></main>
+
+  <footer class="footer-text">
+    放學狀態會即時顯示於看板上 | 每日自動儲存/可重設
+  </footer>
+
+  <script>
+    // 班級架構定義 (共 25 個班級，與你的截圖完全一致)
+    const schoolData = [
+      { grade: "一年級", classes: ["1A班", "1B班", "1C班", "1D班"] },
+      { grade: "二年級", classes: ["2A班", "2B班", "2C班", "2D班"] },
+      { grade: "三年級", classes: ["3A班", "3B班", "3C班", "3D班"] },
+      { grade: "四年級", classes: ["4A班", "4B班", "4C班", "4D班", "4E班"] },
+      { grade: "五年級", classes: ["5A班", "5B班", "5C班", "5D班"] },
+      { grade: "六年級", classes: ["6A班", "6B班", "6C班", "6D班"] }
+    ];
+
+    const STORAGE_KEY = "school_dismissal_status_v1";
+    const DATE_KEY = "school_dismissal_last_date";
+
+    // 取得今天日期字串 (YYYY-MM-DD)
+    function getTodayString() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    }
+
+    // 載入狀態 (自動檢查跨日重設)
+    function loadStatus() {
+      const savedDate = localStorage.getItem(DATE_KEY);
+      const today = getTodayString();
+
+      // 如果跨天了，自動清空重設
+      if (savedDate !== today) {
+        localStorage.setItem(DATE_KEY, today);
+        localStorage.removeItem(STORAGE_KEY);
+        return {};
+      }
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    }
+
+    // 狀態儲存 (紀錄為 { "1A班": true, "1B班": false, ... })
+    let classStatus = loadStatus();
+
+    // 儲存至 LocalStorage
+    function saveStatus() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(classStatus));
+      localStorage.setItem(DATE_KEY, getTodayString());
+    }
+
+    // 切換放學狀態
+    function toggleClass(className) {
+      classStatus[className] = !classStatus[className];
+      saveStatus();
+      render();
+    }
+
+    // 重設所有班級
+    function resetAll() {
+      if (confirm("確定要將所有班級重設為「未放學」狀態嗎？")) {
+        classStatus = {};
+        saveStatus();
+        render();
+      }
+    }
+
+    // 計算總班級數量
+    const totalClasses = schoolData.reduce((acc, g) => acc + g.classes.length, 0);
+
+    // 渲染 UI
+    function render() {
+      const container = document.getElementById("gradesContainer");
+      container.innerHTML = "";
+
+      let releasedCount = 0;
+
+      schoolData.forEach(gradeGroup => {
+        const gradeCard = document.createElement("div");
+        gradeCard.className = "grade-card";
+
+        const title = document.createElement("div");
+        title.className = "grade-title";
+        title.innerText = gradeGroup.grade;
+        gradeCard.appendChild(title);
+
+        const classesGrid = document.createElement("div");
+        classesGrid.className = "classes-grid";
+
+        gradeGroup.classes.forEach(className => {
+          const isReleased = !!classStatus[className];
+          if (isReleased) releasedCount++;
+
+          const btn = document.createElement("button");
+          btn.className = `class-btn ${isReleased ? 'released' : 'unreleased'}`;
+          btn.onclick = () => toggleClass(className);
+
+          btn.innerHTML = `
+            <div class="class-name">${className}</div>
+            <div class="class-status-badge">
+              <span class="status-dot"></span>
+              <span>${isReleased ? '已放學' : '未放學'}</span>
+            </div>
+          `;
+
+          classesGrid.appendChild(btn);
+        });
+
+        gradeCard.appendChild(classesGrid);
+        container.appendChild(gradeCard);
+      });
+
+      // 更新頂部計數器
+      document.getElementById("counter").innerText = `${releasedCount} / ${totalClasses}`;
+    }
+
+    // 初始渲染
+    render();
+  </script>
+</body>
+</html>
